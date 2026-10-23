@@ -53,12 +53,31 @@ if (!['http:', 'https:'].includes(parsedUrl.protocol) || !parsedUrl.hostname) {
     });
 }
 
-    const shortCode = crypto.randomBytes(3).toString('hex');
-    const newUrl = new Url({
-      originalUrl,
-      shortCode,
-      expiresAt: expiresAt ? new Date(expiresAt) : null
+   let expiryDate = null;
+
+if (expiresAt) {
+  expiryDate = new Date(expiresAt);
+
+  if (Number.isNaN(expiryDate.getTime())) {
+    return res.status(400).json({
+      error: 'Invalid expiry date'
     });
+  }
+
+  if (expiryDate.getTime() <= Date.now()) {
+    return res.status(400).json({
+      error: 'Expiry date must be in the future'
+    });
+  }
+}
+
+const shortCode = crypto.randomBytes(3).toString('hex');
+
+const newUrl = new Url({
+  originalUrl: originalUrl.trim(),
+  shortCode,
+  expiresAt: expiryDate
+});
 
     await newUrl.save();
     res.status(201).json(newUrl);
@@ -86,9 +105,14 @@ app.get('/:shortCode', async (req, res) => {
 
     if (!urlRecord) return res.status(404).send('Short URL not found');
 
-    if (urlRecord.expiresAt && new Date() > new Date(urlRecord.expiresAt)) {
-      return res.status(410).send('This link has expired.');
-    }
+   
+if (
+  urlRecord.expiresAt &&
+  Date.now() >= new Date(urlRecord.expiresAt).getTime()
+) {
+  return res.status(410).send('This link has expired.');
+}
+
 
     urlRecord.clicks += 1;
     await urlRecord.save();

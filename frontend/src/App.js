@@ -37,7 +37,7 @@ function App() {
     try {
       const response = await axios.post(`${BACKEND_URL}/api/shorten`, {
         originalUrl,
-        expiresAt: expiresAt ? expiresAt : null
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null
       });
 
       const fullShortUrl = `${BACKEND_URL}/${response.data.shortCode}`;
