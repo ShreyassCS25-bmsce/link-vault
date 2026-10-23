@@ -9,7 +9,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const BACKEND_URL = 'http://localhost:5000';
+  const BACKEND_URL = 'https://link-vault-api.onrender.com';
 
   // Fetch Link Analytics from Server
   const fetchAnalytics = async () => {
