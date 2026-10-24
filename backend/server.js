@@ -9,9 +9,26 @@ const cors = require('cors');
 const crypto = require('crypto');
 const Url = require('./models/Url');
 
+
 const app = express();
-app.use(cors());
+
+const allowedOrigins = [
+  'https://link-vault-kmuu.onrender.com',
+  'http://localhost:3000'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('Not allowed by CORS'));
+  }
+}));
+
 app.use(express.json());
+
 
 // Secure connection string read from environment variable
 const MONGO_URI = process.env.MONGO_URI;
