@@ -2,12 +2,27 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function App() {
-  const [originalUrl, setOriginalUrl] = useState('');
-  const [expiresAt, setExpiresAt] = useState('');
-  const [shortenedLink, setShortenedLink] = useState(null);
-  const [analytics, setAnalytics] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+ const [originalUrl, setOriginalUrl] = useState('');
+const [expiresAt, setExpiresAt] = useState('');
+const [shortenedLink, setShortenedLink] = useState(null);
+const [analytics, setAnalytics] = useState([]);
+const [loading, setLoading] = useState(false);
+const [copied, setCopied] = useState(false);
+const totalLinks = analytics.length;
+
+const totalClicks = analytics.reduce(
+  (sum, item) => sum + (item.clicks || 0),
+  0
+);
+
+const activeLinks = analytics.filter(
+  (item) =>
+    !item.expiresAt ||
+    new Date(item.expiresAt).getTime() > Date.now()
+).length;
+
+const expiredLinks = totalLinks - activeLinks;
+
 
   const BACKEND_URL = 'https://link-vault-api.onrender.com';
 
@@ -106,6 +121,29 @@ function App() {
           </div>
         )}
       </div>
+        
+{/* Analytics Summary */}
+<div style={styles.statsGrid}>
+  <div style={styles.statCard}>
+    <h3>Total Links</h3>
+    <p>{totalLinks}</p>
+  </div>
+
+  <div style={styles.statCard}>
+    <h3>Total Clicks</h3>
+    <p>{totalClicks}</p>
+  </div>
+
+  <div style={styles.statCard}>
+    <h3>Active Links</h3>
+    <p>{activeLinks}</p>
+  </div>
+
+  <div style={styles.statCard}>
+    <h3>Expired Links</h3>
+    <p>{expiredLinks}</p>
+  </div>
+</div>
 
       {/* Analytics Section */}
       <div style={styles.card}>
@@ -158,6 +196,20 @@ const styles = {
   container: { maxWidth: '800px', margin: '0 auto', padding: '30px 20px', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif', backgroundColor: '#f4f7f6', minHeight: '100vh' },
   header: { textAlign: 'center', marginBottom: '30px' },
   card: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px', marginBottom: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' },
+  
+statsGrid: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: '16px',
+  marginBottom: '24px'
+},
+statCard: {
+  backgroundColor: '#ffffff',
+  borderRadius: '12px',
+  padding: '20px',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+},
+
   form: { display: 'flex', flexDirection: 'column', gap: '16px' },
   input: { padding: '12px 16px', fontSize: '16px', borderRadius: '8px', border: '1px solid #ccc', outline: 'none' },
   expiryGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
